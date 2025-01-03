@@ -1,64 +1,75 @@
 const express = require('express');
 const fs = require('fs');
-const path = require('path'); // Importa el módulo 'path'
+const path = require('path');
+const https = require('https');
+const cors = require('cors');
+
 const app = express();
-const PORT = 3000;
+const PORT = 443;
 
-// Middleware para procesar JSON
-app.use(express.json());
+// Habilitar CORS
+app.use(cors());
 
-// Rutas y lógica aquí...
+// Configurar HTTPS
+const options = {
+    key: fs.readFileSync('/etc/letsencrypt/live/blackholesol.site/privkey.pem'),
+    cert: fs.readFileSync('/etc/letsencrypt/live/blackholesol.site/fullchain.pem'),
+};
 
-// Ruta al archivo JSON donde guardamos la información
+// Ruta al archivo JSON
 const contenidoPath = path.join(__dirname, 'contenido.json');
 
-// Middleware para parsear JSON
+// Crear archivo si no existe
+if (!fs.existsSync(contenidoPath)) {
+    fs.writeFileSync(contenidoPath, JSON.stringify({ claveAcceso: 'defaultKey' }, null, 2));
+}
+
+// Middleware
 app.use(express.json());
-app.use(express.static('public')); // Sirve archivos estáticos desde la carpeta public
+app.use(express.static('public'));
 
-// Ruta GET para obtener el contenido (nombre, descripción, imagen de la moneda, etc.)
+// Rutas
 app.get('/contenido', (req, res) => {
-  fs.readFile(contenidoPath, 'utf8', (err, data) => {
-    if (err) {
-      return res.status(500).send({ error: 'Error al leer el archivo de contenido.' });
-    }
-    res.json(JSON.parse(data));
-  });
-});
-
-// Ruta POST para actualizar el contenido
-app.post('/contenido', (req, res) => {
-  const { clave, moneda, ultimaActualizacion, fondo, contadorFin } = req.body;
-
-  // Lee el archivo contenido.json
-  fs.readFile(contenidoPath, 'utf8', (err, data) => {
-    if (err) {
-      return res.status(500).send({ error: 'Error al leer el archivo de contenido.' });
-    }
-
-    const contenido = JSON.parse(data);
-
-    // Verifica la clave de acceso
-    if (clave !== contenido.claveAcceso) {
-      return res.status(403).send({ error: 'Clave de acceso incorrecta.' });
-    }
-
-    // Actualiza los datos solo si están presentes en la solicitud
-    if (moneda) contenido.moneda = moneda;
-    if (ultimaActualizacion) contenido.ultimaActualizacion = ultimaActualizacion;
-    if (fondo) contenido.fondo = fondo;
-    if (contadorFin) contenido.contadorFin = contadorFin;
-
-    // Escribe los cambios en el archivo
-    fs.writeFile(contenidoPath, JSON.stringify(contenido, null, 2), (err) => {
-      if (err) {
-        return res.status(500).send({ error: 'Error al guardar los cambios.' });
-      }
-      res.send({ mensaje: 'Contenido actualizado con éxito.', contenido });
+    fs.readFile(contenidoPath, 'utf8', (err, data) => {
+        if (err) return res.status(500).send({ error: 'Error al leer el archivo.' });
+        try {
+            const contenido = JSON.parse(data);
+            res.json(contenido);
+        } catch {
+            res.status(500).send({ error: 'Archivo JSON corrupto.' });
+        }
     });
-  });
 });
 
-app.listen(PORT, () => {
-  console.log(`Servidor corriendo en http://localhost:${PORT}`);
+app.post('/contenido', (req, res) => {
+    const { clave, moneda, ultimaActualizacion, fondo, contadorFin } = req.body;
+
+    fs.readFile(contenidoPath, 'utf8', (err, data) => {
+        if (err) return res.status(500).send({ error: 'Error al leer el archivo.' });
+
+        try {
+            const contenido = JSON.parse(data);
+
+            if (clave !== contenido.claveAcceso) {
+                return res.status(403).send({ error: 'Clave de acceso incorrecta.' });
+            }
+
+            if (moneda) contenido.moneda = moneda;
+            if (ultimaActualizacion) contenido.ultimaActualizacion = ultimaActualizacion;
+            if (fondo) contenido.fondo = fondo;
+            if (contadorFin) contenido.contadorFin = contadorFin;
+
+            fs.writeFile(contenidoPath, JSON.stringify(contenido, null, 2), (err) => {
+                if (err) return res.status(500).send({ error: 'Error al guardar los cambios.' });
+                res.send({ mensaje: 'Contenido actualizado con éxito.', contenido });
+            });
+        } catch {
+            res.status(500).send({ error: 'Archivo JSON corrupto.' });
+        }
+    });
+});
+
+// Iniciar servidor HTTPS
+https.createServer(options, app).listen(PORT, () => {
+    console.log(`Servidor HTTPS corriendo en https://blackholesol.site`);
 });
