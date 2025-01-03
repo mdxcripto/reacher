@@ -1,0 +1,25 @@
+{
+  "claveAcceso": "zomb",
+  "moneda": {
+    "nombre": "BlackHole",
+    "descripcion": "CA: coming",
+    "imagen": "https://media.discordapp.net/attachments/1313887678584062126/1324337852183478313/image.png?ex=677871fc&is=6777207c&hm=92866571afa227262d54b5cf11b7f7575e6dfb9aa2354beb36186ed45539e84b&=&format=webp&quality=lossless&width=676&height=676"
+  },
+  "botones": [
+    {
+      "imagen": "https://cdn.imweb.me/thumbnail/20230623/51f0345ce30d3.png",
+      "url": "https://url1.com"
+    },
+    {
+      "imagen": "https://cdn.prod.website-files.com/5d66bdc65e51a0d114d15891/64cebe1d31f50e161e4c825a_X-logo-transparent-white-twitter.png",
+      "url": "https://url2.com"
+    },
+    {
+      "imagen": "https://uxwing.com/wp-content/themes/uxwing/download/brands-and-social-media/telegram-white-icon.png",
+      "url": "https://t.me/BlackHole_SOL"
+    }
+  ],
+  "contadorFin": "2025-01-05T00:00:00Z",
+  "ultimaActualizacion": "2025-01-01T00:00:00",
+  "fondo": "linear-gradient(135deg, #240046, #4e0a82, #ff0054)"
+}
