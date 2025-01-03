@@ -3,11 +3,6 @@ const fs = require('fs');
 const path = require('path');
 const https = require('https');
 const cors = require('cors');
-const path = require('path');
-
-app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'index.html')); // Ruta al archivo estático
-});
 
 const app = express();
 const PORT = 443;
@@ -34,6 +29,12 @@ app.use(express.json());
 app.use(express.static('public'));
 
 // Rutas
+
+// Ruta principal
+app.get('/', (req, res) => {
+    res.send('Bienvenido a la página principal de BlackHoleSol!');
+});
+
 app.get('/contenido', (req, res) => {
     fs.readFile(contenidoPath, 'utf8', (err, data) => {
         if (err) return res.status(500).send({ error: 'Error al leer el archivo.' });
