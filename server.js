@@ -3,6 +3,11 @@ const fs = require('fs');
 const path = require('path');
 const https = require('https');
 const cors = require('cors');
+const path = require('path');
+
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'index.html')); // Ruta al archivo estático
+});
 
 const app = express();
 const PORT = 443;
